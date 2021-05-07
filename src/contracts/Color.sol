@@ -43,11 +43,11 @@ contract Color is ERC721Full {
 
   function buyAccessCode(string memory _accessCode, address payable _authorWallet) public payable {
     this.mint(_accessCode);
-    uint pearsonCut = 500000000000000000;
+    uint publisherCut = 500000000000000000;
     uint authorCut = 500000000000000000;
 
     /* wallet.transfer(msg.value); */
-    wallet.transfer(pearsonCut);
+    wallet.transfer(publisherCut);
     _authorWallet.transfer(authorCut);
   }
 
