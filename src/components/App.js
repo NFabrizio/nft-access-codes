@@ -1,7 +1,10 @@
 import React, { Component } from "react";
+import { v4 as uuidv4 } from 'uuid';
 import Web3 from "web3";
 import "./App.css";
 import Color from "../abis/Color.json";
+import AccessList from './AccessList';
+import RestrictedContent from './RestrictedContent';
 
 class App extends Component {
   async componentWillMount() {
@@ -40,7 +43,8 @@ class App extends Component {
       //console.log(await contract.methods);
       this.setState({ totalSupply });
       for (let i = 1; i <= totalSupply; i++) {
-        const color = await contract.methods.colors(i - 1).call();
+        // const color = await contract.methods.colors(i - 1).call();
+        const color = await contract.methods.accessCodes(i - 1).call();
         this.setState({ colors: [...this.state.colors, color] });
       }
     } else {
@@ -48,11 +52,14 @@ class App extends Component {
     }
   }
 
-  mint = color => {
-    console.log(color);
+  // mint = color => {
+  mint = () => {
+    const color = uuidv4();
+    // console.log(color);
     this.state.contract.methods
-      .mint(color)
-      .send({ from: this.state.account })
+      // .mint(color)
+      .buyAccessCode(color, '0x20325DE54276207325A9F5525D8CF8F203Ab4029')
+      .send({ from: this.state.account, value: 1000000000000000000 })
       .once("receipt", receipt => {
         this.setState({
           colors: [...this.state.colors, color]
@@ -60,13 +67,17 @@ class App extends Component {
       });
   };
 
+  route = routeName => this.setState({ route: routeName });
+
   constructor(props) {
     super(props);
     this.state = {
       account: "",
       contract: null,
       totalSupply: 0,
-      colors: []
+      colors: [],
+      price: 1000000000000000000,
+      route: 'access'
     };
   }
 
@@ -76,11 +87,11 @@ class App extends Component {
         <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
           <a
             className="navbar-brand col-sm-3 col-md-2 mr-0"
-            href="http://www.dappuniversity.com/bootcamp"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Color Tokens
+            Pearson eText Access Tokens
           </a>
           <ul className="navbar-nav px-3">
             <li className="nav-item text-nowrap d-none d-sm-none d-sm-block">
@@ -90,50 +101,8 @@ class App extends Component {
             </li>
           </ul>
         </nav>
-        <div className="container-fluid mt-5">
-          <div className="row">
-            <main role="main" className="col-lg-12 d-flex text-center">
-              <div className="content mr-auto ml-auto">
-                <h1>Issue Token</h1>
-                <form
-                  onSubmit={event => {
-                    event.preventDefault();
-                    const color = this.color.value;
-                    this.mint(color);
-                  }}
-                >
-                  <input
-                    type="text"
-                    className="form-control mb-1"
-                    placeholder="e.g., #FFFFFF"
-                    ref={input => {
-                      this.color = input;
-                    }}
-                  />
-                  <input
-                    type="submit"
-                    className="btn btn-block btn-primary"
-                    value="MINT"
-                  />
-                </form>
-              </div>
-            </main>
-          </div>
-          <hr />
-          <div className="row text-center">
-            {this.state.colors.map((color, key) => {
-              return (
-                <div key={key} className="col-md-3 mb-3">
-                  <div
-                    className="token"
-                    style={{ backgroundColor: color }}
-                  ></div>
-                  <div>{color}</div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        {this.state.route === 'access' && <AccessList colors={this.state.colors} mint={this.mint} price={this.state.price} route={this.route} />}
+        {this.state.route === 'restricted' && <RestrictedContent contract={this.state.contract} route={this.route} />}
       </div>
     );
   }

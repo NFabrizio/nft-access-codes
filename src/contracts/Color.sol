@@ -37,13 +37,18 @@ contract Color is ERC721Full {
     /* accessCode = _accessCode; */
   }
 
-  function() external payable {
+  /* function() external payable {
     buyAccessCode();
-  }
+  } */
 
-  function buyAccessCode(string memory _accessCode) public payable {
+  function buyAccessCode(string memory _accessCode, address payable _authorWallet) public payable {
     this.mint(_accessCode);
-    wallet.transfer(msg.value);
+    uint pearsonCut = 500000000000000000;
+    uint authorCut = 500000000000000000;
+
+    /* wallet.transfer(msg.value); */
+    wallet.transfer(pearsonCut);
+    _authorWallet.transfer(authorCut);
   }
 
   // E.G. color = "#FFFFFF"
@@ -53,4 +58,16 @@ contract Color is ERC721Full {
     //Call the mint function
     _mint(msg.sender, _id);
   }
+
+  /* function stringToUint(string memory s) view returns (uint result) {
+        bytes memory b = bytes(s);
+        uint i;
+        result = 0;
+        for (i = 0; i < b.length; i++) {
+            uint c = uint(b[i]);
+            if (c >= 48 && c <= 57) {
+                result = result * 10 + (c - 48);
+            }
+        }
+    } */
 }
